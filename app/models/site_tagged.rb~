@@ -1,0 +1,273 @@
+# encoding: utf-8
+class Site < ActiveRecord::Base
+
+  hobo_model # Don't put anything above this
+  
+  require 'open-uri'
+
+  LIMIT = 3
+    
+  fields do
+    name        :string
+    title       :text
+    description :text
+    rank        :integer, :default => 0
+    icon        :string
+    timestamps
+  end
+  attr_accessible :name, :title, :description, :site_id, :state
+
+  self.per_page = 20
+
+  has_many :links
+  
+  has_many :site_words
+  has_many :words, :through => :site_words
+
+  has_many :site_users
+  has_many :users, :through => :site_users
+  
+  lifecycle do
+
+    state :normal, :manual
+    
+    create :add, :become => :normal, :params => [:name], :available_to => :all do
+      delay.read name, LIMIT, '', acting_user
+    end
+    
+    transition :deep, { :normal => :normal }, :available_to => :all do
+      delay.read name, LIMIT, '', acting_user
+    end
+
+  end
+
+  
+  
+  class UrlValidator < ActiveModel::EachValidator
+    def validate_each(record, attribute, value)
+      begin
+        uri = URI.parse(value)
+ 
+        if !["http","https"].include?(uri.scheme)
+          raise URI::InvalidURIError
+        end
+      rescue URI::InvalidURIError
+        record.errors[attribute] << "Invalid URL"
+      end
+    end
+  end
+ 
+  validates :name, :url => true
+
+
+  def read( site, limit, originator, user )
+    
+    puts site
+    
+    return if site.include?('share?')
+    return if site.include?('//ad.')
+    return if site.include?('bookmark.')
+
+    self.name = site
+  
+    self.state = 'normal'
+
+    def stripp s
+      begin
+        s = s.strip.scrub
+      rescue
+        return ''
+      end
+      return s
+    end
+    
+    def putta( x, limit )
+      spacer = ''
+      (LIMIT - limit).times do 
+	spacer = spacer + '  ' 
+      end
+      puts "#{spacer}#{x}"
+    end
+    
+    # limit = limit - 1
+
+    if limit > -1
+      
+      begin
+	page = Nokogiri::HTML(open(site), nil, 'UTF-8')
+      rescue
+	return
+      end
+      
+      
+      putta "->: #{originator}", limit
+      
+      
+      title = page.css("title")[0]
+      if title
+	begin
+	  self.title = clean(stripp title.text)
+	rescue
+	end
+      end
+      
+      putta "t:: #{title} (#{site})", limit
+      
+      description = page.xpath("//meta[@name='description']/@content")[0]
+      if description
+	begin
+	  self.description = clean(stripp description.value)
+	rescue
+	end
+      end
+      putta "d:: #{description}", limit
+
+  #     keywords = page.xpath("//meta[@name='keywords']/@content")[0]
+  #     if keywords
+  #       begin
+  #         keywords = stripp keywords.value
+  #       rescue
+  #	  end
+  #     end
+  #     putta "k:: #{keywords}", limit
+
+      
+      
+      favicon = page.xpath("//link[@rel='shortcut icon']/@href")[0]
+ 
+      favicon ||= page.xpath("//link[@rel='apple-touch-icon image_src']/@href")[0]
+      
+      if favicon
+	begin
+	  self.icon = stripp favicon.value
+	rescue
+	end
+      end
+
+      if !favicon
+	uri = URI.parse site
+	favicon = uri.scheme + '://' + uri.host + '/favicon.ico'
+	self.icon = stripp favicon
+      end
+  
+      putta "f:: #{favicon}", limit
+
+      if !id
+	s = Site.all.where name: name
+	if s.size > 0
+	  s = s.first
+	  s.title = self.title
+	  s.description = self.description
+	  s.rank_by_links
+	  s.save
+	  s.splitwords user
+	  if s.id != self.id
+	    delete
+	  end
+	  st = s
+	else
+	  rank_by_links
+	  self.save
+	  splitwords user
+	  st = self
+	end
+      else
+	rank_by_links
+	self.save
+        splitwords user
+	st = self
+      end
+
+
+      if user and user.id
+	SiteUser.find_or_create_by_site_id_and_user_id st.id, user.id
+      end
+      
+      links = page.css("a")
+      links.each do |link|
+	if link["href"] and ( link["href"][0..6] == 'http://' or link["href"][0..7] == 'https://' )
+# 	  s = Site.all.where name: link["href"]
+# 	  if s.size< 1
+# 	    s = Site.new
+# 	  else
+# 	    s = s.first
+# 	  end
+ 	  begin
+	    linktext = stripp link.text
+	  rescue
+	    linktext =''
+	  end
+	  puts 'linktext', linktext
+	  read link["href"], limit - 1, linktext, user
+	  l = Link.find_by_site_id_and_url nil, link["href"]
+	  if l
+	    l.site_id = st.id
+	    l.save
+	  else
+	    l = Link.find_by_site_id_and_url st.id, link["href"]
+	    if !l
+	      Link.create :site_id => st.id, :name =>  linktext, :url => link["href"]
+	    end
+	  end
+	end
+      end
+      
+      self
+    end
+    
+  end
+  
+  def clean a
+    a.gsub(/\[\(\)\[\]\?\.\,:;\-\_|#&@\{\}!<>$€§]“”’/,' ').split.join(' ').downcase
+  end
+
+  def splitwords( user )
+    if s = self.description
+      words = clean(s).split
+      words.each do |w|
+	w.downcase!
+	next if w.size < 2
+	word = Word.find_by_name w
+	if !word
+	  word = Word.create :name => w
+	end
+	if SiteWord.all.where( site_id: self.id, word_id: word.id).size < 1
+	  word.rank = word.rank + 1
+	  word.save
+	  SiteWord.create site_id: self.id, word_id: word.id
+	  if user and user.id
+	    if WordUser.all.where( word_id: word.id, user_id: user.id).size < 1
+	      WordUser.create word_id: word.id, user_id: user.id
+	    end
+          end
+	end
+      end
+    end
+  end
+  
+  def rank_by_links
+    links = Link.all
+    self.rank = links.where(url: self.name).size
+  end
+  
+  # --- Permissions --- #
+
+  def create_permitted?
+    acting_user.administrator?
+    true
+  end
+
+  def update_permitted?
+    acting_user.administrator?
+    true
+  end
+
+  def destroy_permitted?
+    acting_user.administrator?
+  end
+
+  def view_permitted?(field)
+    true
+  end
+
+end

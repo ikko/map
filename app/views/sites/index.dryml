@@ -1,0 +1,6 @@
+ <index-page>
+   <content-header:></content-header:>
+   <collection: replace>
+     <collection/>
+   </collection:>
+ </index-page> 

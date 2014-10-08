@@ -1,0 +1,5 @@
+web:    bundle exec rails s 
+# unicorn_rails -p $9000 -c ./config/unicorn.rb
+# worker: bundle exec rake jobs:work
+worker: bundle exec bin/delayed_job run
+# search: bundle exec rake sunspot:solr:run

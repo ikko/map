@@ -1,0 +1,8 @@
+ <index-page>
+   <content-header: replace>
+     <card with="&Word.find(params[:word_id])"/> -|-     
+   </content-header:>
+   <collection: replace>
+     <collection/>
+   </collection:>
+ </index-page>

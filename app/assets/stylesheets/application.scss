@@ -1,0 +1,28 @@
+/*
+ * This is the global stylesheet manifest file.  Files or plugins
+ * referenced from here or placed in the application/ directory will be
+ * included in all subsites.  This file is included by front.css and all
+ * subsites.
+ *
+ *= require_self
+ *= require_tree ./application
+*/
+
+.well.card, .well { padding: 16px; float: left; text-align: center }
+.well.card img { 
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  background-color: lightgrey;
+  text-align: center 
+}
+
+.well.card img:hover
+{ 
+  background-color: white;
+}
+
+.well.card.word
+{ 
+  background-color: lightblue;
+}

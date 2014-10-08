@@ -1,0 +1,33 @@
+class WordsController < ApplicationController
+
+  hobo_model_controller
+
+  auto_actions [ :index, :show ]
+  
+  auto_actions_for :sites, :index
+  
+  def show
+    @w = Word.find(params[:id])
+    if @w.words.size == 0
+      redirect_to "/words/#{@w.id}/sites/"
+    else
+      hobo_index @this = @w.words
+    end
+  end
+  
+  def index
+    if current_user.guest?
+      hobo_index Word.all.where( word_id: nil ) 
+    else
+      hobo_index current_user.words
+    end
+  end
+  
+  index_action :def
+  
+  def tree
+    render :json => Word.tree
+  end
+
+  
+end

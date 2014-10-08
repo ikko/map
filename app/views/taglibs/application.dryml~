@@ -1,0 +1,44 @@
+<!-- this file is included by front_site.dryml, admin_site.dryml et al, so
+you can place common code in this file. -->
+
+<extend tag="card" for="Word">
+  <old-card merge>
+    <before-heading:>
+      <a href="&current_user.guest? ? ( this.word_id ? object_url( @parrent = this.word) : '/words' ) : object_url( @parrent = this.parrent(current_user.id))" ><%= this.word_id ? h(@parrent.try.name.to_s) : (params[:id].to_i == this.id ? '^^^^' : '') %></a>
+    </before-heading:>
+    <heading: param><a href="&@w and @w.id == this.id ? object_url(this)+'/sites' : object_url(this)"><%= h this.to_s %></a></heading:>
+
+    <body: param>
+      <a href="&object_url(this) + '/sites'">
+        <img src="&this.sites.try.first.icon" width="16" height="16"/>
+        <!--%= h this.to_s %-->
+      </a>
+    </body:>
+
+
+  </old-card>
+</extend>
+
+
+<extend tag="card" for="Site">
+  <old-card merge>
+    <before-heading:>
+      <a href="&this.name" target='_blank'>
+         <img src="&this.icon" width="16" height="16"/>
+         <!--%= h this.name.to_s %-->
+      </a>
+    </before-heading:>
+    <heading: param><a href="&object_url(this) + '/words'"><%= h this.title.to_s %></a></heading:>
+  </old-card>
+</extend>
+
+<def tag="main-nav">
+  <navigation merge-attrs>
+    <nav-item href="/words/">Words</nav-item>
+    <nav-item href="/sites/">Sites</nav-item>
+    <nav-item href="/reqs/">Reqests</nav-item>
+  </navigation>
+</def>
+
+<def tag="app-name">
+</def>

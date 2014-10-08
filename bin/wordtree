@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+
+require File.expand_path(File.join(File.dirname(__FILE__), '..', 'config', 'environment'))
+
+while true
+  
+  puts 'wordmapping...'
+
+  Word.find_parrents nil
+  User.all do |user|
+    Word.find_parrents user.id
+  end
+  
+  puts 'sleep'
+  sleep 3600
+
+end

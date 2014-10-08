@@ -1,0 +1,5 @@
+ <index-page>
+   <collection: replace>
+     <collection/>
+   </collection:>
+ </index-page> 

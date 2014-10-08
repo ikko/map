@@ -1,0 +1,9 @@
+ <index-page>
+   <content-header: replace>
+     <transition-button with="&s = Site.find(params[:site_id])" transition="scan" ajax/>
+     <card with="&s"/>
+   </content-header:>
+   <collection: replace>
+     <collection/>
+   </collection:>
+ </index-page>

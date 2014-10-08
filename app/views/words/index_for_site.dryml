@@ -1,0 +1,8 @@
+ <index-page>
+   <content-header: replace>
+     <card with="&s = Site.find(params[:site_id])"/>
+   </content-header:>
+   <collection: replace>
+     <collection/>
+   </collection:>
+ </index-page>

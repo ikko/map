@@ -1,0 +1,6 @@
+ <show-page>
+   <content: replace>
+     <card with="&@w"/>
+     <collection/>
+   </content:>
+ </show-page> 
