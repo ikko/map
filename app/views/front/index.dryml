@@ -25,17 +25,17 @@
 
         <h3>Open data</h3>
         <p>
-          You can examine stored information on the following urls:
+          You can examine the stored information on the following urls:
         </p>
         <li><a href='/reqs.json' target='_blank'>/reqs.json</a></li>
         <li><a href='/reqs.pdf'  target='_blank'>/reqs.pdf</a></li>
         <li><a href='/reqs.csv'  target='_blank'>/reqs.csv</a></li>
         <li><a href='/reqs.xls'  target='_blank'>/reqs.xls</a></li>
         <hr/>
-        <li><a href='/words.json' target='_blank'>/reqs.json</a></li>
-        <li><a href='/words.pdf'  target='_blank'>/reqs.pdf</a></li>
-        <li><a href='/words.csv'  target='_blank'>/reqs.csv</a></li>
-        <li><a href='/words.xls'  target='_blank'>/reqs.xls</a></li>
+        <li><a href='/words.json' target='_blank'>/words.json</a></li>
+        <li><a href='/words.pdf'  target='_blank'>/words.pdf</a></li>
+        <li><a href='/words.csv'  target='_blank'>/words.csv</a></li>
+        <li><a href='/words.xls'  target='_blank'>/words.xls</a></li>
         <hr/>
         <li><a href='/sites.json' target='_blank'>/sites.json</a></li>
         <li><a href='/sites.pdf'  target='_blank'>/sites.pdf</a></li>
@@ -43,7 +43,7 @@
         <li><a href='/sites.xls'  target='_blank'>/sites.xls</a></li>
         <hr/>
 
-        <p>You can follow tracking information about the requests at <a href='/reqs/auto'>/reqs/auto</a>.</p>
+        <p>You can follow detailed tracking information about the requests at <a href='/reqs/auto'>/reqs/auto</a>.</p>
       </section>
     </header>
 
